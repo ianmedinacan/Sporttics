@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sporttics — Science & Data in Sports</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1814; --ink-muted: #5a5650; --ink-faint: #9a9590;
+    --paper: #f7f4ef; --paper-warm: #ede9e1;
+    --accent: #c0392b;
+    --nfl-color: #013369; --nba-color: #c9082a; --soccer-color: #1a5c38;
+    --border: #d4cfc6; --border-light: #e8e3da;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+  /* MASTHEAD */
+  .masthead { background: var(--ink); text-align: center; border-bottom: 4px solid var(--accent); }
+  .masthead-inner { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 1.5rem; }
+  .masthead-kicker { font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.75rem; }
+  .masthead-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; color: #f7f4ef; line-height: 0.95; letter-spacing: -0.02em; }
+  .masthead-title span { color: var(--accent); }
+  .masthead-tagline { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1rem; color: #9a9590; margin-top: 0.75rem; max-width: 680px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+  .masthead-meta { display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; letter-spacing: 0.1em; color: #6a6660; text-transform: uppercase; }
+
+  /* NAV */
+  .sport-nav { background: var(--ink); position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--border); }
+  .sport-nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: stretch; }
+  .nav-btn { flex: 1; background: none; border: none; cursor: pointer; padding: 1.1rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #7a7670; transition: all 0.2s; border-bottom: 3px solid transparent; }
+  .nav-btn:hover { color: #f7f4ef; background: rgba(255,255,255,0.04); }
+  .nav-btn.active { color: #f7f4ef; }
+  .nav-btn[data-sport="nfl"].active { border-bottom-color: var(--nfl-color); color: #6fa8dc; }
+  .nav-btn[data-sport="nba"].active { border-bottom-color: var(--nba-color); color: #e88; }
+  .nav-btn[data-sport="soccer"].active { border-bottom-color: var(--soccer-color); color: #7dba9b; }
+  .nav-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .nav-btn[data-sport="nfl"] .nav-dot { background: #6fa8dc; }
+  .nav-btn[data-sport="nba"] .nav-dot { background: #e88; }
+  .nav-btn[data-sport="soccer"] .nav-dot { background: #7dba9b; }
+
+  /* SECTIONS */
+  .sport-section { display: none; max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+  .sport-section.active { display: block; }
+
+  /* HOME */
+  .section-rule { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+  .section-rule::before { content: ''; display: block; height: 2px; width: 32px; background: var(--accent); flex-shrink: 0; }
+  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
+
+  /* SPORT HEADER */
+  .sport-header { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 2px solid var(--border); display: flex; align-items: flex-end; justify-content: space-between; }
+  .sport-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+  .sport-title.nfl-title span { color: var(--nfl-color); }
+  .sport-title.nba-title span { color: var(--nba-color); }
+  .sport-title.soccer-title span { color: var(--soccer-color); }
+  .sport-subtitle { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1rem; color: var(--ink-faint); margin-top: 0.4rem; }
+
+  /* ARTICLE GRID */
+  .articles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+  .hero-sport-tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; margin-bottom: 0.75rem; }
+  .tag-nfl { background: #dde8f4; color: var(--nfl-color); }
+  .tag-nba { background: #fce8e8; color: var(--nba-color); }
+  .tag-soccer { background: #d6eee1; color: var(--soccer-color); }
+  .tag-analytics { background: #f0e8f4; color: #6b3a8a; }
+
+  .article-card { cursor: pointer; padding-bottom: 2rem; border-bottom: 1px solid var(--border-light); }
+  .article-card:hover .article-headline { color: var(--accent); }
+  .article-card.featured { grid-column: 1 / -1; padding-bottom: 2.5rem; border-bottom: 2px solid var(--border); }
+  .article-headline { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; line-height: 1.2; color: var(--ink); margin-bottom: 0.75rem; transition: color 0.15s; }
+  .article-card.featured .article-headline { font-size: 2rem; }
+  .article-deck { font-family: 'Source Serif 4', serif; font-size: 0.95rem; line-height: 1.6; color: var(--ink-muted); margin-bottom: 1rem; }
+  .article-card.featured .article-deck { font-size: 1.1rem; }
+  .article-meta { display: flex; align-items: center; gap: 1rem; font-size: 11px; letter-spacing: 0.06em; color: var(--ink-faint); text-transform: uppercase; }
+  .article-meta-dot { color: var(--border); }
+
+  /* EMPTY STATE */
+  .empty-state { grid-column: 1 / -1; text-align: center; padding: 5rem 2rem; border: 2px dashed var(--border); border-radius: 4px; }
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; }
+  .empty-state-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--ink); margin-bottom: 0.5rem; }
+  .empty-state-desc { font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--ink-faint); line-height: 1.6; }
+
+  /* ARTICLE FULL VIEW */
+  #article-view { display: none; max-width: 720px; margin: 0 auto; padding: 3rem 2rem; }
+  #article-view.active { display: block; }
+  .article-back { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; margin-bottom: 2rem; transition: color 0.15s; }
+  .article-back:hover { color: var(--accent); }
+  .article-full-headline { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.1; color: var(--ink); margin-bottom: 1.25rem; }
+  .article-full-deck { font-family: 'Source Serif 4', serif; font-size: 1.2rem; font-style: italic; line-height: 1.6; color: var(--ink-muted); border-left: 3px solid var(--accent); padding-left: 1.25rem; margin-bottom: 1.5rem; }
+  .article-full-byline { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .byline-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .byline-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .byline-date { font-size: 11px; color: var(--ink-faint); }
+  .article-body { font-family: 'Source Serif 4', serif; font-size: 1.1rem; line-height: 1.8; color: var(--ink); }
+  .article-body p { margin-bottom: 1.5rem; }
+  .article-body h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border-light); }
+  .article-body h3 { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin: 2rem 0 0.75rem; }
+  .article-body blockquote { background: var(--paper-warm); border-left: 3px solid var(--ink); padding: 1.25rem 1.5rem; margin: 2rem 0; font-style: italic; border-radius: 0 2px 2px 0; }
+  .data-callout { background: var(--ink); color: var(--paper); padding: 1.5rem 2rem; margin: 2rem 0; border-radius: 2px; }
+  .data-callout-number { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 900; color: var(--accent); line-height: 1; }
+  .data-callout-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #7a7670; margin-top: 0.25rem; }
+  .data-callout-context { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.9rem; color: #9a9590; margin-top: 1rem; line-height: 1.5; }
+
+  /* HOME SPORT CARDS */
+  .sport-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1.5rem; }
+  .sport-card { cursor: pointer; padding: 1.5rem; border: 1px solid var(--border); transition: box-shadow 0.2s; }
+  .sport-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .sport-card-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .sport-card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .sport-card-desc { font-size: 13px; color: var(--ink-muted); }
+
+  /* FOOTER */
+  footer { background: var(--ink); color: #7a7670; padding: 3rem 2rem; text-align: center; margin-top: 4rem; }
+  .footer-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--paper); margin-bottom: 0.5rem; }
+  .footer-tagline { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .footer-links { display: flex; justify-content: center; gap: 2rem; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .footer-links a { color: #7a7670; text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--accent); }
+  .footer-copy { font-size: 11px; color: #4a4a48; }
+
+  @media (max-width: 768px) {
+    .articles-grid { grid-template-columns: 1fr; }
+    .sport-cards { grid-template-columns: 1fr; }
+    .sport-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="masthead-kicker">Analysis · Data · Sports</p>
+    <h1 class="masthead-title">Sport<span>tics</span></h1>
+    <p class="masthead-tagline">Beyond talent, there is science. Explore with us how data analysis and advanced metrics are redefining the way we understand, play, and win in sports.</p>
+    <div class="masthead-meta">
+      <span>Founded March 22, 2026</span><span>·</span><span>NFL · NBA · Soccer</span><span>·</span><span>Advanced Analytics</span>
+    </div>
+  </div>
+</header>
+
+<nav class="sport-nav">
+  <div class="sport-nav-inner">
+    <button class="nav-btn active" data-sport="home" onclick="showSection('home')">Home</button>
+    <button class="nav-btn" data-sport="nfl" onclick="showSection('nfl')"><span class="nav-dot"></span>NFL</button>
+    <button class="nav-btn" data-sport="nba" onclick="showSection('nba')"><span class="nav-dot"></span>NBA</button>
+    <button class="nav-btn" data-sport="soccer" onclick="showSection('soccer')"><span class="nav-dot"></span>Soccer</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<section id="home-section" class="sport-section active">
+  <div class="section-rule"><span class="section-label">Explore by Sport</span></div>
+  <div class="sport-cards">
+    <div class="sport-card" onclick="showSection('nfl')" style="border-top:3px solid var(--nfl-color);">
+      <div class="sport-card-label" style="color:var(--nfl-color);">NFL</div>
+      <div class="sport-card-title">Football</div>
+      <div class="sport-card-desc">EPA, Win Probability, DVOA and the models reshaping the modern NFL.</div>
+    </div>
+    <div class="sport-card" onclick="showSection('nba')" style="border-top:3px solid var(--nba-color);">
+      <div class="sport-card-label" style="color:var(--nba-color);">NBA</div>
+      <div class="sport-card-title">Basketball</div>
+      <div class="sport-card-desc">RAPTOR, BPM, True Shooting. The analytics revolution that arrived from baseball.</div>
+    </div>
+    <div class="sport-card" onclick="showSection('soccer')" style="border-top:3px solid var(--soccer-color);">
+      <div class="sport-card-label" style="color:var(--soccer-color);">Soccer</div>
+      <div class="sport-card-title">Football</div>
+      <div class="sport-card-desc">xG, xA, PPDA and the data Opta and StatsBomb are selling to the world's top clubs.</div>
+    </div>
+  </div>
+  <div id="home-articles" style="margin-top:3rem;">
+    <!-- Latest articles from all sports appear here automatically -->
+  </div>
+</section>
+
+<!-- NFL -->
+<section id="nfl-section" class="sport-section">
+  <div class="sport-header">
+    <div>
+      <h2 class="sport-title nfl-title">Football<br><span>Analytics</span></h2>
+      <p class="sport-subtitle">National Football League · Data Analysis</p>
+    </div>
+  </div>
+  <div class="articles-grid" id="nfl-grid"></div>
+</section>
+
+<!-- NBA -->
+<section id="nba-section" class="sport-section">
+  <div class="sport-header">
+    <div>
+      <h2 class="sport-title nba-title">Basketball<br><span>Analytics</span></h2>
+      <p class="sport-subtitle">National Basketball Association · Advanced Metrics</p>
+    </div>
+  </div>
+  <div class="articles-grid" id="nba-grid"></div>
+</section>
+
+<!-- SOCCER -->
+<section id="soccer-section" class="sport-section">
+  <div class="sport-header">
+    <div>
+      <h2 class="sport-title soccer-title">Soccer<br><span>Analytics</span></h2>
+      <p class="sport-subtitle">World Football · Data Science</p>
+    </div>
+  </div>
+  <div class="articles-grid" id="soccer-grid"></div>
+</section>
+
+<!-- ARTICLE VIEW -->
+<section id="article-view">
+  <span class="article-back" id="article-back-btn" onclick="closeArticle()">← Back</span>
+  <div id="article-content"></div>
+</section>
+
+<footer>
+  <div class="footer-title">Sporttics</div>
+  <div class="footer-tagline">Beyond talent, there is science.</div>
+  <div class="footer-links">
+    <a href="#">NFL</a><a href="#">NBA</a><a href="#">Soccer</a><a href="#">Methodology</a><a href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 Sporttics — All rights reserved</div>
+</footer>
+
+<script>
+/* ============================================================
+   ✏️  HOW TO ADD YOUR ARTICLES
+   ============================================================
+
+   Each article is an object inside the correct sport array.
+   Copy the template below and fill in your content.
+
+   FIELDS:
+   -------
+   sport       → "nfl" | "nba" | "soccer"
+   tag         → "tag-nfl" | "tag-nba" | "tag-soccer" | "tag-analytics"
+   tagText     → Short label shown on the card, e.g. "NFL · Deep Dive"
+   headline    → Title of your article
+   deck        → One-sentence summary shown on the card
+   author      → Your name
+   date        → e.g. "March 22, 2025"
+   readTime    → e.g. "6 min"
+   featured    → true = big card at the top, false = regular card
+                 (only set ONE article per sport as featured: true)
+   body        → Full article in HTML. Use these tags:
+                   <p>Paragraph text</p>
+                   <h2>Section title</h2>
+                   <h3>Sub-section label</h3>
+                   <blockquote>Pull quote</blockquote>
+                   <div class="data-callout">
+                     <div class="data-callout-number">42</div>
+                     <div class="data-callout-label">Stat label</div>
+                     <div class="data-callout-context">Context sentence</div>
+                   </div>
+
+   ============================================================ */
+
+const articles = [
+
+  /* ──────────────────────────────────────────────
+     NFL ARTICLES  —  add yours below this line
+  ────────────────────────────────────────────── */
+  {
+    sport: "nfl",
+    tag: "tag-nfl",
+    tagText: "NFL · Analytics",
+    headline: "Your first NFL article title goes here",
+    deck: "A one or two sentence summary of what this article is about.",
+    author: "Your Name",
+    date: "March 22, 2025",
+    readTime: "5 min",
+    featured: true,
+    body: `
+      <p>Write your article content here. This is the opening paragraph — make it strong.</p>
+      <h2>Your first section title</h2>
+      <p>Continue your analysis here. You can add as many paragraphs as you need.</p>
+      <blockquote>Use this for a key quote or insight you want to highlight.</blockquote>
+      <h2>Your second section</h2>
+      <p>More analysis...</p>
+      <div class="data-callout">
+        <div class="data-callout-number">42.1%</div>
+        <div class="data-callout-label">Your key stat label</div>
+        <div class="data-callout-context">One sentence explaining what this number means and why it matters.</div>
+      </div>
+      <p>Closing thoughts...</p>
+    `
+  },
+
+  /* ──────────────────────────────────────────────
+     NBA ARTICLES  —  add yours below this line
+  ────────────────────────────────────────────── */
+  {
+    sport: "nba",
+    tag: "tag-nba",
+    tagText: "NBA · Analytics",
+    headline: "Your first NBA article title goes here",
+    deck: "A one or two sentence summary of what this article is about.",
+    author: "Your Name",
+    date: "March 22, 2025",
+    readTime: "5 min",
+    featured: true,
+    body: `
+      <p>Write your article content here.</p>
+      <h2>Your first section</h2>
+      <p>Your analysis...</p>
+    `
+  },
+
+  /* ──────────────────────────────────────────────
+     SOCCER ARTICLES  —  add yours below this line
+  ────────────────────────────────────────────── */
+  {
+    sport: "soccer",
+    tag: "tag-soccer",
+    tagText: "Soccer · Analytics",
+    headline: "Your first Soccer article title goes here",
+    deck: "A one or two sentence summary of what this article is about.",
+    author: "Your Name",
+    date: "March 22, 2025",
+    readTime: "5 min",
+    featured: true,
+    body: `
+      <p>Write your article content here.</p>
+      <h2>Your first section</h2>
+      <p>Your analysis...</p>
+    `
+  },
+
+];
+
+/* ============================================================
+   🔧  ENGINE — do not edit below this line
+   ============================================================ */
+
+function renderGrid(sport) {
+  const grid = document.getElementById(sport + '-grid');
+  const sportArticles = articles.filter(a => a.sport === sport);
+  if (sportArticles.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📝</div>
+      <div class="empty-state-title">No articles yet</div>
+      <div class="empty-state-desc">Open the HTML file and add your articles inside the <code>articles</code> array.</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = sportArticles.map((a, i) => `
+    <div class="article-card ${a.featured ? 'featured' : ''}" onclick="openArticle('${sport}', ${i})">
+      <span class="hero-sport-tag ${a.tag}">${a.tagText}</span>
+      <h3 class="article-headline">${a.headline}</h3>
+      <p class="article-deck">${a.deck}</p>
+      <div class="article-meta">
+        <span>${a.author}</span>
+        <span class="article-meta-dot">·</span>
+        <span>${a.date}</span>
+        <span class="article-meta-dot">·</span>
+        <span>${a.readTime} read</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHome() {
+  const container = document.getElementById('home-articles');
+  const recent = [...articles].reverse().slice(0, 4);
+  if (recent.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+      <div style="height:2px;width:32px;background:var(--accent);flex-shrink:0;"></div>
+      <span style="font-size:10px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent);">Latest Articles</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+      ${recent.map(a => {
+        const idx = articles.filter(x => x.sport === a.sport).indexOf(a);
+        return `<div class="article-card" onclick="openArticle('${a.sport}', ${idx})">
+          <span class="hero-sport-tag tag-${a.sport}">${a.tagText}</span>
+          <h3 class="article-headline" style="font-size:1.2rem;">${a.headline}</h3>
+          <p class="article-deck" style="font-size:0.9rem;">${a.deck}</p>
+          <div class="article-meta"><span>${a.date}</span><span class="article-meta-dot">·</span><span>${a.readTime} read</span></div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function openArticle(sport, idx) {
+  const sportArticles = articles.filter(a => a.sport === sport);
+  const article = sportArticles[idx];
+  if (!article) return;
+  document.querySelectorAll('.sport-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('article-view').classList.add('active');
+  document.getElementById('article-back-btn').setAttribute('data-sport', sport);
+  const initials = article.author.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  document.getElementById('article-content').innerHTML = `
+    <div style="margin-bottom:1rem;"><span class="hero-sport-tag ${article.tag}">${article.tagText}</span></div>
+    <h1 class="article-full-headline">${article.headline}</h1>
+    <p class="article-full-deck">${article.deck}</p>
+    <div class="article-full-byline">
+      <div class="byline-avatar">${initials}</div>
+      <div><div class="byline-name">${article.author}</div><div class="byline-date">${article.date} · ${article.readTime} read</div></div>
+    </div>
+    <div class="article-body">${article.body}</div>
+  `;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSection(sport) {
+  document.querySelectorAll('.sport-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  closeArticleView();
+  document.getElementById(sport === 'home' ? 'home-section' : sport + '-section').classList.add('active');
+  document.querySelector(`[data-sport="${sport}"]`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeArticle() {
+  const sport = document.getElementById('article-back-btn').getAttribute('data-sport') || 'home';
+  closeArticleView();
+  document.querySelectorAll('.sport-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(sport === 'home' ? 'home-section' : sport + '-section').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeArticleView() {
+  document.getElementById('article-view').classList.remove('active');
+  document.getElementById('article-content').innerHTML = '';
+}
+
+// Init
+['nfl','nba','soccer'].forEach(renderGrid);
+renderHome();
+</script>
+</body>
+</html>
